@@ -1,0 +1,26 @@
+%% Your job is to implement the RICA cost and gradient
+function [cost,grad] = softICACost(theta, x, params)
+
+% unpack weight matrix
+W = reshape(theta, params.numFeatures, params.n);
+
+% project weights to norm ball (prevents degenerate bases)
+Wold = W;
+W = l2rowscaled(W, 1);
+lambda = params.lambda;
+epsilon = params.epsilon;
+dim = params.n;
+%%% YOUR CODE HERE %%%
+%epsilon= 0.01;
+Wx_smooth = sqrt( (W*x).^2 + epsilon);
+regularized = lambda * sum(sum(  Wx_smooth ));
+cost = 0.5 * sum(sum((W'*W*x-x).^2)) + regularized;
+cost = 1/dim * cost;
+%regularizedGrad = 
+W_minus = W' * W * x - x;
+Wgrad = W * W_minus * x' + (W*x) * W_minus';
+grad_regularized = lambda * (W*x) ./ Wx_smooth * x';
+Wgrad = 1/dim * ( Wgrad+ grad_regularized) ;
+% unproject gradient for minFunc
+grad = l2rowscaledg(Wold, W, Wgrad, 1);
+grad = grad(:);
